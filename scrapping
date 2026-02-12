@@ -1,0 +1,47 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+
+# Initialize driver
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+
+driver.get("https://store.steampowered.com")
+
+accept_button = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.ID, "acceptAllButton"))
+)
+accept_button.click()
+
+time.sleep(2)
+
+bouton_parcourir = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Parcourir')]"))
+    )
+bouton_parcourir.click()
+
+time.sleep(2)
+
+bouton_promo = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, 'specials')]"))
+)
+bouton_promo.click()
+
+time.sleep(5)
+
+# Fonction pour scroller la page
+def scroll_page(driver, scrolls=5, pause_time=2):
+    """Scroll la page pour charger plus de jeux"""
+    for i in range(scrolls):
+        # Scroll vers le bas
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        print(f"Scroll {i+1}/{scrolls}")
+        time.sleep(pause_time)
+
+# Scroller la page pour charger plus de jeux
+print("Scrolling de la page...")
+scroll_page(driver, scrolls=5, pause_time=2)
+
