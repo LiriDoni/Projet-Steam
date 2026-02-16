@@ -5,6 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import csv
+
 
 # Initialize driver
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -60,42 +62,49 @@ liste_jeux = driver.find_elements(By.XPATH, "//div[contains(@class, 'sale_item_b
 
 print(f"Nombre de jeux trouvés (filtrés) : {len(liste_jeux)}")
 
-# 2. On boucle sur chaque "boîte" une par une
-for jeu in liste_jeux:
-    print("------------------------------------------------")
-    try:
-        # --- TITRE ---
-        # ⚠️ ATTENTION AU POINT "." AU DÉBUT DU XPATH !
-        # Le "." signifie "Cherche à l'intérieur de 'jeu', pas dans toute la page"
-        titre = jeu.find_element(By.XPATH, ".//img").get_attribute("alt")
-    except:
-        titre = "Titre inconnu"
+with open('jeux_steam.csv', 'w', newline='', encoding='utf-8') as f:
+    writer = csv.writer(f)
 
-    try:
-        # --- PRIX ---
-        # On cherche la div de prix À L'INTÉRIEUR de la variable 'jeu'
-        infos_prix = jeu.find_element(By.XPATH, ".//div[contains(@class, 'StoreSalePriceWidgetContainer')]").get_attribute("aria-label")
-    except:
-        infos_prix = "Pas de prix / Gratuit"
+    writer.writerow(["Titre", "Infos Prix", "Avis", "Résumé"])   
+    
+    # 2. On boucle sur chaque "boîte" une par une
+    for jeu in liste_jeux:
+        print("------------------------------------------------")
+        try:
+         # --- TITRE ---
+            # ⚠️ ATTENTION AU POINT "." AU DÉBUT DU XPATH !
+         # Le "." signifie "Cherche à l'intérieur de 'jeu', pas dans toute la page"
+            titre = jeu.find_element(By.XPATH, ".//img").get_attribute("alt")
+        except:
+            titre = "Titre inconnu"
 
-    try:
-        # --- ÉVALUATION ---
-        # Idem, on cherche l'avis À L'INTÉRIEUR de 'jeu'
-        infos_eval = jeu.find_element(By.XPATH, ".//a[contains(@class, 'ReviewScore')]//div[@aria-label]").get_attribute("aria-label")
-    except:
-        infos_eval = "Pas d'évaluation"
+        try:
+            # --- PRIX ---
+            # On cherche la div de prix À L'INTÉRIEUR de la variable 'jeu'
+            infos_prix = jeu.find_element(By.XPATH, ".//div[contains(@class, 'StoreSalePriceWidgetContainer')]").get_attribute("aria-label")
+        except:
+            infos_prix = "Pas de prix / Gratuit"
 
-    try:
-        # --- RÉSUMÉ ---
-        # On cherche la div dont la classe contient 'StoreSaleWidgetShortDesc'
-        resume = jeu.find_element(By.XPATH, ".//div[contains(@class, 'StoreSaleWidgetShortDesc')]").text
-    except:
-        resume = "Pas de résumé disponible"
+        try:
+            # --- ÉVALUATION ---
+            # Idem, on cherche l'avis À L'INTÉRIEUR de 'jeu'
+            infos_eval = jeu.find_element(By.XPATH, ".//a[contains(@class, 'ReviewScore')]//div[@aria-label]").get_attribute("aria-label")
+        except:
+            infos_eval = "Pas d'évaluation"
 
-    # Affichage des résultats liés
-    print(f"Jeu : {titre}")
-    print(f"Prix : {infos_prix}")
-    print(f"Avis : {infos_eval}")
-    print(f"Résumé : {resume}")
+        try:
+            # --- RÉSUMÉ ---
+            # On cherche la div dont la classe contient 'StoreSaleWidgetShortDesc'
+            resume = jeu.find_element(By.XPATH, ".//div[contains(@class, 'StoreSaleWidgetShortDesc')]").text
+        except:
+            resume = "Pas de résumé disponible"
 
+        # Affichage des résultats liés
+        print(f"Jeu : {titre}")
+        print(f"Prix : {infos_prix}")
+        print(f"Avis : {infos_eval}")
+        print(f"Résumé : {resume}")
+        writer.writerow([titre, infos_prix, infos_eval, resume])
+        print(f"Sauvegardé : {titre}")
 
+print("--- FIN DU SCRAPING ---")
